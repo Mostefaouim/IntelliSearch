@@ -22,8 +22,7 @@ Cette application permet de charger des documents textuels, de les indexer en ut
 ```
 tf-idf-search-app/
 ├── backend/
-│   ├── app.py               # API Flask et logique métier
-│   └── Dockerfile           # Configuration Docker pour le backend
+│   ├── app.js               # API express js et logique métier
 ├── frontend/
 │   ├── public/
 │   ├── src/
@@ -45,7 +44,6 @@ tf-idf-search-app/
 
 ### Prérequis
 
-- Python 3.8+
 - Node.js 14+
 - npm ou yarn
 
@@ -56,20 +54,21 @@ tf-idf-search-app/
    cd backend
    ```
 
-2. Créer un environnement virtuel (optionnel mais recommandé):
+2. Installer les dépendances:
    ```
-   python -m venv venv
-   source venv/bin/activate  # Sur Windows: venv\Scripts\activate
+   npm init -y
+
+   npm install express cors multer natural stopword nodemon 
+
    ```
 
-3. Installer les dépendances:
+3. Créez un dossier uploads à la racine du projet :
    ```
-   pip install flask flask-cors nltk
+   mkdir uploads
    ```
-
 4. Lancer le serveur:
    ```
-   python app.py
+   nodemon app.js
    ```
    Le serveur démarrera sur http://localhost:5000
 
@@ -99,15 +98,6 @@ tf-idf-search-app/
    ```
    L'application sera accessible sur http://localhost:3000
 
-### Installation avec Docker
-
-Si vous préférez utiliser Docker:
-
-1. Construire et démarrer les conteneurs:
-   ```
-   docker-compose up --build
-   ```
-   L'application sera accessible sur http://localhost:3000
 
 ## Guide d'Utilisation
 
