@@ -20,7 +20,7 @@ Cette application permet de charger des documents textuels, de les indexer en ut
 ## Structure du Projet
 
 ```
-tf-idf-search-app/
+TP_RI/
 ├── backend/
 │   ├── app.js               # API express js et logique métier
 ├── frontend/
@@ -34,9 +34,7 @@ tf-idf-search-app/
 │   │   ├── App.js           # Composant principal
 │   │   ├── App.css          # Styles CSS
 │   │   └── index.js         # Point d'entrée React
-│   ├── package.json         # Dépendances
-│   └── Dockerfile           # Configuration Docker pour le frontend
-├── docker-compose.yml       # Configuration Docker Compose
+│   ├── package.json         # Dépendances         
 └── README.md                # Ce fichier
 ```
 
@@ -170,10 +168,10 @@ Le TF-IDF (Term Frequency-Inverse Document Frequency) est une méthode statistiq
 
 ## Architecture Technique
 
-### Backend (Python/Flask)
+### Backend (NodeJS /ExpressJS)
 
-- Utilisation de **Flask** comme framework web léger
-- Bibliothèque **NLTK** pour le traitement du langage naturel (stopwords, stemming)
+- Utilisation de **ExpressJS** comme framework web léger
+- Bibliothèque **natural** pour le traitement du langage naturel (stopwords, stemming)
 - API RESTful avec 3 points d'entrée principaux:
   - `/api/upload` : Réception des fichiers texte
   - `/api/index` : Indexation TF-IDF des documents
@@ -191,7 +189,7 @@ Le TF-IDF (Term Frequency-Inverse Document Frequency) est une méthode statistiq
 
 ## Fonctionnement Détaillé du Code
 
-### Backend (app.py)
+### Backend (app.js)
 
 Le backend est construit autour de la classe `TFIDFSearchEngine` qui implémente toutes les fonctionnalités d'indexation et de recherche:
 
@@ -199,7 +197,7 @@ Le backend est construit autour de la classe `TFIDFSearchEngine` qui implémente
 2. **Indexation** : Calcul des scores TF pour chaque document, puis des scores IDF et finalement des scores TF-IDF.
 3. **Recherche** : La requête subit le même prétraitement, puis les scores de similarité sont calculés entre le vecteur de la requête et chaque document.
 
-Les API REST (Flask) exposent ces fonctionnalités au frontend:
+Les API REST exposent ces fonctionnalités au frontend:
 - `/api/upload` : Pour uploader les fichiers texte
 - `/api/index` : Pour lancer l'indexation
 - `/api/search` : Pour effectuer une recherche
@@ -213,13 +211,3 @@ L'interface utilisateur est divisée en composants React:
 3. `IndexViewer.js` : Affiche l'index TF-IDF sous forme de tableau avec des fonctionnalités de tri et de filtrage.
 4. `SearchForm.js` : Permet de saisir une requête et de choisir la méthode de similarité.
 5. `SearchResults.js` : Affiche les résultats de recherche triés par pertinence.
-
-## Pistes d'Amélioration
-
-- Ajouter la prise en charge d'autres formats de fichiers (PDF, DOC, etc.)
-- Implémenter d'autres méthodes de similarité (Jaccard, etc.)
-- Ajouter une visualisation graphique des documents et leurs relations
-- Optimiser l'indexation pour de grands volumes de documents
-- Ajouter des fonctionnalités de filtrage et de facettes pour les résultats de recherche
-- Implémenter la correction orthographique et les suggestions de requêtes
-- Sauvegarder l'index pour éviter de recalculer à chaque session

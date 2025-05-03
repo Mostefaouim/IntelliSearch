@@ -252,8 +252,7 @@ app.post('/api/upload', upload.array('files'), (req, res) => {
 // Point d'API pour indexer les documents
 app.post('/api/index', (req, res) => {
     searchEngine.computeTFIDF();
-    
-    // Format de retour pour l'affichage dans l'interface
+
     const indexData = {};
     Object.entries(searchEngine.index).forEach(([term, docs]) => {
         indexData[term] = Object.entries(docs).map(([docId, score]) => ({
@@ -269,7 +268,7 @@ app.post('/api/index', (req, res) => {
     });
 });
 
-// Point d'API pour rechercher des documents
+
 app.post('/api/search', (req, res) => {
     const { query, similarity_method = 'cosine' } = req.body;
     
@@ -294,7 +293,7 @@ app.post('/api/search', (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT =  5000;
 app.listen(PORT, () => {
     console.log(`Serveur démarré sur le port ${PORT}`);
 });
