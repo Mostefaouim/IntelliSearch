@@ -22,11 +22,10 @@ class TFIDFSearchEngine {
         this.documentFrequencies = {};
         this.documentVectors = {};
         
-        // Liste personnalisée de stopwords français
-        this.frenchStopwords = ['le', 'la', 'les', 'un', 'une', 'des', 'et', 'ou', 'de', 'du', 'en', 'est', 'pour', 'pas', 'que', 'qui', 'par', 'sur', 'dans', 'avec', 'ce', 'cette', 'ces', 'au', 'aux', 'plus', 'moins', 'votre', 'notre', 'leur', 'tous', 'tout', 'toute', 'toutes', 'autre', 'autres', 'même', 'aussi', 'fait'];
-        
-        // Combinaison des stopwords anglais fournis par le module et les français personnalisés
-        this.stopwords = [...this.frenchStopwords];
+        this.frenchStopwords = [' ', 'le', 'la', 'les', 'un', 'une', 'des', 'et', 'ou', 'de', 'du', 'en', 'est', 'pour', 'pas', 'que', 'qui', 'par', 'sur', 'dans', 'avec', 'ce', 'cette', 'ces', 'au', 'aux', 'plus', 'moins', 'votre', 'notre', 'leur', 'tous', 'tout', 'toute', 'toutes', 'autre', 'autres', 'même', 'aussi', 'fait'];
+        this.englishStopwords = ['a', 'an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'for', 'if', 'in', 'into', 'is', 'it', 'no', 'not', 'of', 'on', 'or', 'such', 'that', 'the', 'their', 'then', 'there', 'these', 'they', 'this', 'to', 'was', 'will', 'with'];
+
+        this.stopwords = [...this.frenchStopwords, ...this.englishStopwords];
     }
 
     normalizeText(text) {
@@ -46,8 +45,8 @@ class TFIDFSearchEngine {
         // Utilise le module stopword pour les mots anglais
         let filteredTokens = removeStopwords(tokens);
         
-        // Filtre manuellement les stopwords français
-        filteredTokens = filteredTokens.filter(token => !this.frenchStopwords.includes(token));
+        filteredTokens = filteredTokens.filter(token => !this.stopwords.includes(token));
+
         
         return filteredTokens;
     }

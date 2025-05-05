@@ -1,5 +1,5 @@
 import { useState } from 'react';
-
+import './SearchForm.css';
 function SearchForm({ isIndexed, onSearchResults }) {
   const [query, setQuery] = useState('');
   const [similarityMethod, setSimilarityMethod] = useState('cosine');
@@ -66,6 +66,7 @@ function SearchForm({ isIndexed, onSearchResults }) {
             value={similarityMethod}
             onChange={(e) => setSimilarityMethod(e.target.value)}
             disabled={!isIndexed || isSearching}
+            className="similarity-select"
           >
             <option value="cosine">Similarité Cosinus</option>
             <option value="euclidean">Distance Euclidienne</option>
