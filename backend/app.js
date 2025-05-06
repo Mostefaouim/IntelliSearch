@@ -1,140 +1,50 @@
-// backend/app.js
-import express from "express";
-import cors from "cors";
-import multer from "multer";
-import fs from "fs";
-import path from "path";
-import natural from "natural";
-import { removeStopwords } from "stopword";
+import express from 'express';
+import cors from 'cors';
+import multer from 'multer';
+import fs from 'fs';
+import path from 'path';
+import natural from 'natural';
 const stemmer = natural.PorterStemmer;
+import { removeStopwords } from 'stopword';
 
 const app = express();
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ dest: 'uploads/' });
 
 app.use(cors());
 app.use(express.json());
 
-// Classe pour gerer l'indexation et la recherche TF-IDF
 class TFIDFSearchEngine {
   constructor() {
     this.documents = {};
     this.index = {};
     this.documentFrequencies = {};
     this.documentVectors = {};
-
-    this.frenchStopwords = [
-      " ",
-      "le",
-      "la",
-      "les",
-      "un",
-      "une",
-      "des",
-      "et",
-      "ou",
-      "de",
-      "du",
-      "en",
-      "est",
-      "pour",
-      "pas",
-      "que",
-      "qui",
-      "par",
-      "sur",
-      "dans",
-      "avec",
-      "ce",
-      "cette",
-      "ces",
-      "au",
-      "aux",
-      "plus",
-      "moins",
-      "votre",
-      "notre",
-      "leur",
-      "tous",
-      "tout",
-      "toute",
-      "toutes",
-      "autre",
-      "autres",
-      "même",
-      "aussi",
-      "fait",
-    ];
-    this.englishStopwords = [
-      "a",
-      "an",
-      "and",
-      "are",
-      "as",
-      "at",
-      "be",
-      "but",
-      "by",
-      "for",
-      "if",
-      "in",
-      "into",
-      "is",
-      "it",
-      "no",
-      "not",
-      "of",
-      "on",
-      "or",
-      "such",
-      "that",
-      "the",
-      "their",
-      "then",
-      "there",
-      "these",
-      "they",
-      "this",
-      "to",
-      "was",
-      "will",
-      "with",
-      "its",
-    ];
-
+    this.frenchStopwords = ['le', 'la', 'les', 'un', 'une', 'des', 'et', 'ou', 'de', 'du', 'en', 'est', 'pour', 'pas', 'que', 'qui', 'par', 'sur', 'dans', 'avec', 'ce', 'cette', 'ces', 'au', 'aux', 'plus', 'moins', 'votre', 'notre', 'leur', 'tous', 'tout', 'toute', 'toutes', 'autre', 'autres', 'même', 'aussi', 'fait'];
+    this.englishStopwords = ['a', 'its', 'an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'for', 'if', 'in', 'into', 'is', 'it', 'no', 'not', 'of', 'on', 'or', 'such', 'that', 'the', 'their', 'then', 'there', 'these', 'they', 'this', 'to', 'was', 'will', 'with'];
     this.stopwords = [...this.frenchStopwords, ...this.englishStopwords];
   }
 
   normalizeText(text) {
-    // Normalise le texte : minuscules, suppression caractères speciaux
     text = text.toLowerCase();
-    text = text.replace(/[^\w\s]/g, "");
+    text = text.replace(/[^\w\s]/g, '');
     return text;
   }
 
   tokenize(text) {
-    // Tokenise le texte en mots
     return text.split(/\s+/);
   }
 
   removeStopwords(tokens) {
-    // Supprime les mots vides (stopwords)
-    // Utilise le module stopword pour les mots anglais
     let filteredTokens = removeStopwords(tokens);
-
-    filteredTokens = filteredTokens.filter(
-      (token) => !this.stopwords.includes(token)
-    );
-
+    filteredTokens = filteredTokens.filter(token => !this.stopwords.includes(token));
     return filteredTokens;
   }
 
   stemTokens(tokens) {
-    // Applique le stemming sur les tokens
-    return tokens.map((token) => stemmer.stem(token));
+    return tokens.map(token => stemmer.stem(token));
   }
 
   preprocess(text) {
-    // Applique toutes les etapes de pretraitement
     const normalizedText = this.normalizeText(text);
     const tokens = this.tokenize(normalizedText);
     const tokensWithoutStopwords = this.removeStopwords(tokens);
@@ -143,66 +53,44 @@ class TFIDFSearchEngine {
   }
 
   addDocument(docId, documentText) {
-    // Ajoute un document au corpus
     this.documents[docId] = documentText;
   }
 
   computeTF(document) {
-    // Calcule la frequence des termes (TF)
     const tokens = this.preprocess(document);
     const tfDict = {};
-
-    tokens.forEach((token) => {
+    tokens.forEach(token => {
       tfDict[token] = (tfDict[token] || 0) + 1;
     });
-
-    // Normalisation du TF par la taille du document
     const docSize = tokens.length;
-    Object.keys(tfDict).forEach((token) => {
+    Object.keys(tfDict).forEach(token => {
       tfDict[token] = docSize > 0 ? tfDict[token] / docSize : 0;
     });
-
     return tfDict;
   }
 
   computeDocumentFrequencies() {
-    // Calcule la frequence des documents pour chaque terme
     this.documentFrequencies = {};
-
-    Object.entries(this.documents).forEach(([, document]) => {
+    Object.entries(this.documents).forEach(([docId, document]) => {
       const tokens = new Set(this.preprocess(document));
-      tokens.forEach((token) => {
-        this.documentFrequencies[token] =
-          (this.documentFrequencies[token] || 0) + 1;
+      tokens.forEach(token => {
+        this.documentFrequencies[token] = (this.documentFrequencies[token] || 0) + 1;
       });
     });
   }
 
   computeTFIDF() {
-    // Calcule le TF-IDF pour tous les documents
     this.index = {};
     this.documentVectors = {};
-
-    // D'abord, calculer la frequence des termes par document
     const totalDocs = Object.keys(this.documents).length;
-
-    // Calculer la frequence des documents pour chaque terme
     this.computeDocumentFrequencies();
-
-    // Calculer le TF-IDF pour chaque terme dans chaque document
     Object.entries(this.documents).forEach(([docId, document]) => {
       const tfDict = this.computeTF(document);
       this.documentVectors[docId] = {};
-
       Object.entries(tfDict).forEach(([token, tf]) => {
-        // Calculer l'IDF
         const df = this.documentFrequencies[token] || 0;
-        const idf = Math.log(totalDocs / (df + 1)) + 1; // +1 pour eviter la division par zero
-
-        // Calculer TF-IDF
+        const idf = Math.log(totalDocs / (df + 1)) + 1;
         const tfidf = tf * idf;
-
-        // Stocker dans l'index et dans le vecteur du document
         if (!this.index[token]) {
           this.index[token] = {};
         }
@@ -213,180 +101,120 @@ class TFIDFSearchEngine {
   }
 
   cosineSimilarity(queryVector, documentVector) {
-    // Calcule la similarite cosinus entre deux vecteurs
     let dotProduct = 0;
-
     Object.entries(queryVector).forEach(([term, weight]) => {
       if (documentVector[term]) {
         dotProduct += weight * documentVector[term];
       }
     });
-
-    // Calculer la norme des vecteurs
-    const queryNorm = Math.sqrt(
-      Object.values(queryVector).reduce(
-        (sum, weight) => sum + weight * weight,
-        0
-      )
-    );
-    const docNorm = Math.sqrt(
-      Object.values(documentVector).reduce(
-        (sum, weight) => sum + weight * weight,
-        0
-      )
-    );
-
+    const queryNorm = Math.sqrt(Object.values(queryVector).reduce((sum, weight) => sum + weight * weight, 0));
+    const docNorm = Math.sqrt(Object.values(documentVector).reduce((sum, weight) => sum + weight * weight, 0));
     if (queryNorm === 0 || docNorm === 0) {
       return 0;
     }
-
     return dotProduct / (queryNorm * docNorm);
   }
 
   euclideanDistance(queryVector, documentVector) {
-    // Calcule la distance euclidienne entre deux vecteurs
-    // Creer un ensemble de tous les termes dans les deux vecteurs
-    const allTerms = new Set([
-      ...Object.keys(queryVector),
-      ...Object.keys(documentVector),
-    ]);
-
-    // Calculer la somme des carres des differences
+    const allTerms = new Set([...Object.keys(queryVector), ...Object.keys(documentVector)]);
     let sumSquaredDiff = 0;
-    allTerms.forEach((term) => {
+    allTerms.forEach(term => {
       const qVal = queryVector[term] || 0;
       const dVal = documentVector[term] || 0;
       sumSquaredDiff += Math.pow(qVal - dVal, 2);
     });
-
-    // La distance euclidienne est la racine carree de cette somme
     const distance = Math.sqrt(sumSquaredDiff);
-
-    // Pour la recherche, nous voulons que des valeurs plus elevees indiquent une meilleure correspondance
-    // Donc nous retournons l'inverse de la distance (avec un petit epsilon pour eviter la division par zero)
-    return distance; // Return the actual Euclidean distance for correct similarity calculation
+    return 1 / (distance + 0.0001);
   }
 
   search(query, similarityMethod = "cosine") {
-    // Recherche les documents correspondant à la requête
-    // Pretraiter la requête
     const preprocessedQuery = this.preprocess(query);
-
-    // Calculer TF pour la requête
     const queryTF = {};
-    preprocessedQuery.forEach((token) => {
+    preprocessedQuery.forEach(token => {
       queryTF[token] = (queryTF[token] || 0) + 1;
     });
-
-    // Normaliser par la longueur de la requête
     const queryLength = preprocessedQuery.length;
-    Object.keys(queryTF).forEach((token) => {
+    Object.keys(queryTF).forEach(token => {
       queryTF[token] = queryLength > 0 ? queryTF[token] / queryLength : 0;
     });
-
-    // Calculer TF-IDF pour la requête
     const totalDocs = Object.keys(this.documents).length;
     const queryVector = {};
-
     Object.entries(queryTF).forEach(([token, tf]) => {
       const df = this.documentFrequencies[token] || 0;
-      const idf = Math.log(totalDocs / (df + 1)) + 1;
+      const idf = Math.log2(totalDocs / (df + 1)) + 1;
       queryVector[token] = tf * idf;
     });
-
-    // Calculer la similarite/distance avec chaque document
     const scores = {};
     Object.entries(this.documentVectors).forEach(([docId, docVector]) => {
       if (similarityMethod === "cosine") {
         scores[docId] = this.cosineSimilarity(queryVector, docVector);
       } else {
-        // euclidean
         scores[docId] = this.euclideanDistance(queryVector, docVector);
       }
     });
-
-    // Trier les resultats par score decroissant
     const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-
     return sortedScores;
   }
 }
 
-// Initialiser le moteur de recherche
 const searchEngine = new TFIDFSearchEngine();
 
-// Point d'API pour uploader des fichiers
-app.post("/api/upload", upload.array("files"), (req, res) => {
+app.post('/api/upload', upload.array('files'), (req, res) => {
   if (!req.files || req.files.length === 0) {
-    return res.status(400).json({ error: "Aucun fichier trouve" });
+    return res.status(400).json({ error: 'Aucun fichier trouvé' });
   }
-
-  // Vider les documents precedents
   searchEngine.documents = {};
-
-  req.files.forEach((file) => {
-    if (path.extname(file.originalname) === ".txt") {
-      const content = fs.readFileSync(file.path, "utf-8");
+  req.files.forEach(file => {
+    if (path.extname(file.originalname) === '.txt') {
+      const content = fs.readFileSync(file.path, 'utf-8');
       searchEngine.addDocument(file.originalname, content);
-
-      // Supprimer le fichier temporaire après utilisation
       fs.unlinkSync(file.path);
     }
   });
-
   return res.json({
-    message: `${Object.keys(searchEngine.documents).length} fichiers charges`,
-    documents: Object.keys(searchEngine.documents),
+    message: `${Object.keys(searchEngine.documents).length} fichiers chargés`,
+    documents: Object.keys(searchEngine.documents)
   });
 });
 
-// Point d'API pour indexer les documents
-app.post("/api/index", (_, res) => {
+app.post('/api/index', (req, res) => {
   searchEngine.computeTFIDF();
-
   const indexData = {};
   Object.entries(searchEngine.index).forEach(([term, docs]) => {
     indexData[term] = Object.entries(docs).map(([docId, score]) => ({
       document: docId,
-      tfidf: score,
+      tfidf: score
     }));
   });
-
   return res.json({
-    message: "Indexation terminee",
+    message: 'Indexation terminée',
     index: indexData,
-    terms_count: Object.keys(searchEngine.index).length,
+    terms_count: Object.keys(searchEngine.index).length
   });
 });
 
-app.post("/api/search", (req, res) => {
-  const { query, similarity_method = "cosine" } = req.body;
-
+app.post('/api/search', (req, res) => {
+  const { query, similarity_method = 'cosine' } = req.body;
   if (!query) {
-    return res.status(400).json({ error: "Requête vide" });
+    return res.status(400).json({ error: 'Requête vide' });
   }
-
   const searchResults = searchEngine.search(query, similarity_method);
-
-  // Format de retour pour l'affichage
   const formattedResults = searchResults.map(([docId, score]) => {
     const content = searchEngine.documents[docId];
     return {
       document: docId,
       score: score,
-      content:
-        content.length > 200 ? content.substring(0, 200) + "..." : content,
+      content: content.length > 200 ? content.substring(0, 200) + "..." : content
     };
   });
-
   return res.json({
-    results: formattedResults,
+    results: formattedResults
   });
 });
 
 const PORT = 5000;
 app.listen(PORT, () => {
-  console.log(`Serveur demarre sur le port ${PORT}`);
+  console.log(`Serveur démarré sur le port ${PORT}`);
 });
 
 export default app;
