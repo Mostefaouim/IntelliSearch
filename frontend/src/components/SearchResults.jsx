@@ -15,7 +15,7 @@ function SearchResults({ results }) {
         {results.map((result, index) => (
           <div key={index} className="result-item">
             <h3>{result.document}</h3>
-            <p className="score">Score: {parseFloat(result.score).toFixed(4)}</p>
+            <p className="score">Score: {result.score > 0 ? parseFloat(result.score).toFixed(4) : 0}</p>
             <p className="preview">{result.content}</p>
           </div>
         ))}
