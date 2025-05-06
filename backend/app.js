@@ -7,155 +7,156 @@ import natural from 'natural';
 import { removeStopwords } from 'stopword';
 
 const app = express();
-const upload = multer({ dest: 'uploads/' });
-const stemmer = natural.PorterStemmer;
+const fileUploader = multer({ dest: 'uploads/' });
+const wordStemmer = natural.PorterStemmer;
 
 app.use(cors());
 app.use(express.json());
 
-class TFIDFSearchEngine {
+class SearchEngine {
   constructor() {
-    this.documents = {};
-    this.index = {};
-    this.documentFrequencies = {};
-    this.documentVectors = {};
-    this.stopwords = [
+    this.allTexts = {};
+    this.invertedIndex = {};
+    this.wordDocumentCounts = {};
+    this.textVectors = {};
+    this.stopWordsList = [
       ...['le', 'la', 'les', 'un', 'une', 'des', 'et', 'ou', 'de', 'du', 'en', 'est', 'pour', 'pas', 'que', 'qui', 'par', 'sur', 'dans', 'avec', 'ce', 'cette', 'ces', 'au', 'aux', 'plus', 'moins', 'votre', 'notre', 'leur', 'tous', 'tout', 'toute', 'toutes', 'autre', 'autres', 'même', 'aussi', 'fait'],
       ...['a', 'its', 'an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'for', 'if', 'in', 'into', 'is', 'it', 'no', 'not', 'of', 'on', 'or', 'such', 'that', 'the', 'their', 'then', 'there', 'these', 'they', 'this', 'to', 'was', 'will', 'with']
     ];
   }
 
-  preprocess(text) {
-    const normalized = text.toLowerCase().replace(/[^\w\s]/g, '');
-    const tokens = normalized.split(/\s+/);
-    const filtered = removeStopwords(tokens).filter(token => !this.stopwords.includes(token));
-    return filtered.map(token => stemmer.stem(token));
+  cleanText(text) {
+    const lower = text.toLowerCase().replace(/[^\w\s]/g, '');
+    const words = lower.split(/\s+/);
+    const filtered = removeStopwords(words).filter(word => !this.stopWordsList.includes(word));
+    return filtered.map(word => wordStemmer.stem(word));
   }
 
-  addDocument(docId, documentText) {
-    this.documents[docId] = documentText;
+  addText(fileName, fileText) {
+    this.allTexts[fileName] = fileText;
   }
 
-  computeTF(document) {
-    const tokens = this.preprocess(document);
-    const tfDict = tokens.reduce((acc, token) => {
-      acc[token] = (acc[token] || 0) + 1;
+  getTermFrequency(text) {
+    const words = this.cleanText(text);
+    const freqMap = words.reduce((acc, word) => {
+      acc[word] = (acc[word] || 0) + 1;
       return acc;
     }, {});
   
-    const maxFreq = Math.max(...Object.values(tfDict));
+    const highest = Math.max(...Object.values(freqMap));
   
-    Object.keys(tfDict).forEach(token => tfDict[token] /= maxFreq);
+    Object.keys(freqMap).forEach(word => freqMap[word] /= highest);
   
-    return tfDict;
+    return freqMap;
   }
 
-  computeDocumentFrequencies() {
-    this.documentFrequencies = {};
-    Object.values(this.documents).forEach(document => {
-      new Set(this.preprocess(document)).forEach(token => {
-        this.documentFrequencies[token] = (this.documentFrequencies[token] || 0) + 1;
+  countWordsInTexts() {
+    this.wordDocumentCounts = {};
+    Object.values(this.allTexts).forEach(text => {
+      new Set(this.cleanText(text)).forEach(word => {
+        this.wordDocumentCounts[word] = (this.wordDocumentCounts[word] || 0) + 1;
       });
     });
   }
 
-  computeTFIDF() {
-    this.index = {};
-    this.documentVectors = {};
-    const totalDocs = Object.keys(this.documents).length;
-    this.computeDocumentFrequencies();
+  buildTFIDF() {
+    this.invertedIndex = {};
+    this.textVectors = {};
+    const numberOfTexts = Object.keys(this.allTexts).length;
+    this.countWordsInTexts();
 
-    Object.entries(this.documents).forEach(([docId, document]) => {
-      const tfDict = this.computeTF(document);
-      this.documentVectors[docId] = {};
-      Object.entries(tfDict).forEach(([token, tf]) => {
-        const idf = Math.log2(totalDocs / (this.documentFrequencies[token] || 1));
+    Object.entries(this.allTexts).forEach(([fileName, fileText]) => {
+      const tfMap = this.getTermFrequency(fileText);
+      this.textVectors[fileName] = {};
+      Object.entries(tfMap).forEach(([word, tf]) => {
+        const idf = Math.log2(numberOfTexts / (this.wordDocumentCounts[word] || 1));
         const tfidf = tf * idf;
-        this.index[token] = this.index[token] || {};
-        this.index[token][docId] = tfidf;
-        this.documentVectors[docId][token] = tfidf;
+        this.invertedIndex[word] = this.invertedIndex[word] || {};
+        this.invertedIndex[word][fileName] = tfidf;
+        this.textVectors[fileName][word] = tfidf;
       });
     });
   }
 
-  calculateSimilarity(queryVector, documentVector, method) {
+  compareVectors(queryVec, docVec, method) {
     if (method === 'cosine') {
-      let dotProduct = 0, queryNorm = 0, docNorm = 0;
-      Object.entries(queryVector).forEach(([term, weight]) => {
-        dotProduct += weight * (documentVector[term] || 0);
-        queryNorm += weight ** 2;
+      let dot = 0, querySize = 0, docSize = 0;
+      Object.entries(queryVec).forEach(([word, value]) => {
+        dot += value * (docVec[word] || 0);
+        querySize += value ** 2;
       });
-      Object.values(documentVector).forEach(weight => docNorm += weight ** 2);
-      return dotProduct / (Math.sqrt(queryNorm) * Math.sqrt(docNorm) || 1);
+      Object.values(docVec).forEach(value => docSize += value ** 2);
+      return dot / (Math.sqrt(querySize) * Math.sqrt(docSize));
     } else {
-      const allTerms = new Set([...Object.keys(queryVector), ...Object.keys(documentVector)]);
-      let sum = 0;
-      allTerms.forEach(term => {
-        const diff = (queryVector[term] || 0) - (documentVector[term] || 0);
-        sum += diff ** 2;
+      const allWords = new Set([...Object.keys(queryVec), ...Object.keys(docVec)]);
+      let total = 0;
+      allWords.forEach(word => {
+        const diff = (queryVec[word] || 0) - (docVec[word] || 0);
+        total += diff ** 2;
       });
-      return 1 / (Math.sqrt(sum) + 0.0001);
+      return 1 / Math.sqrt(total);
     }
   }
 
-  search(query, method = 'cosine') {
-    const tokens = this.preprocess(query);
-    const queryTF = tokens.reduce((acc, token) => {
-      acc[token] = (acc[token] || 0) + 1;
+  searchText(searchText, method = 'cosine') {
+    const words = this.cleanText(searchText);
+    const tfMap = words.reduce((acc, word) => {
+      acc[word] = (acc[word] || 0) + 1;
       return acc;
     }, {});
-    const length = tokens.length;
-    Object.keys(queryTF).forEach(token => queryTF[token] /= length);
+    const totalWords = words.length;
+    Object.keys(tfMap).forEach(word => tfMap[word] /= totalWords);
 
-    const totalDocs = Object.keys(this.documents).length;
-    const queryVector = {};
-    Object.entries(queryTF).forEach(([token, tf]) => {
-      const idf = Math.log2(totalDocs / (this.documentFrequencies[token] || 1));
-      queryVector[token] = tf * idf;
+    const totalDocs = Object.keys(this.allTexts).length;
+    const queryVec = {};
+    Object.entries(tfMap).forEach(([word, tf]) => {
+      const idf = Math.log2(totalDocs / (this.wordDocumentCounts[word] || 1));
+      queryVec[word] = tf * idf;
     });
 
-    return Object.entries(this.documentVectors)
-      .map(([docId, vector]) => [docId, this.calculateSimilarity(queryVector, vector, method)])
+    return Object.entries(this.textVectors)
+      .map(([fileName, vector]) => [fileName, this.compareVectors(queryVec, vector, method)])
       .sort((a, b) => b[1] - a[1]);
   }
 }
 
-const searchEngine = new TFIDFSearchEngine();
+const engine = new SearchEngine();
 
-app.post('/api/upload', upload.array('files'), (req, res) => {
-  if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'Aucun fichier trouvé' });
+app.post('/api/upload', fileUploader.array('files'), (req, res) => {
+  if (!req.files || req.files.length === 0)
+    return res.status(400).json({ error: 'Aucun fichier trouvé' });
 
-  searchEngine.documents = {};
-  req.files.forEach(file => {
-    if (path.extname(file.originalname) === '.txt') {
-      const content = fs.readFileSync(file.path, 'utf-8');
-      searchEngine.addDocument(file.originalname, content);
-      fs.unlinkSync(file.path);
+  engine.allTexts = {};
+  req.files.forEach(uploaded => {
+    if (path.extname(uploaded.originalname) === '.txt') {
+      const fileData = fs.readFileSync(uploaded.path, 'utf-8');
+      engine.addText(uploaded.originalname, fileData);
+      fs.unlinkSync(uploaded.path);
     }
   });
 
-  res.json({ message: `${Object.keys(searchEngine.documents).length} fichiers chargés`, documents: Object.keys(searchEngine.documents) });
+  res.json({ message: `${Object.keys(engine.allTexts).length} fichiers chargés`, documents: Object.keys(engine.allTexts) });
 });
 
 app.post('/api/index', (req, res) => {
-  searchEngine.computeTFIDF();
-  const indexData = Object.entries(searchEngine.index).reduce((acc, [term, docs]) => {
-    acc[term] = Object.entries(docs).map(([docId, tfidf]) => ({ document: docId, tfidf }));
+  engine.buildTFIDF();
+  const index = Object.entries(engine.invertedIndex).reduce((acc, [word, docs]) => {
+    acc[word] = Object.entries(docs).map(([fileName, tfidf]) => ({ document: fileName, tfidf }));
     return acc;
   }, {});
-  res.json({ message: 'Indexation terminée', index: indexData, terms_count: Object.keys(indexData).length });
+  res.json({ message: 'Indexation terminée', index, terms_count: Object.keys(index).length });
 });
 
 app.post('/api/search', (req, res) => {
   const { query, similarity_method = 'cosine' } = req.body;
   if (!query) return res.status(400).json({ error: 'Requête vide' });
 
-  const results = searchEngine.search(query, similarity_method).map(([docId, score]) => ({
-    document: docId,
+  const matches = engine.searchText(query, similarity_method).map(([fileName, score]) => ({
+    document: fileName,
     score,
-    content: searchEngine.documents[docId].slice(0, 200) + '...'
+    content: engine.allTexts[fileName].slice(0, 200) + '...'
   }));
-  res.json({ results });
+  res.json({ results: matches });
 });
 
 const PORT = 5000;
