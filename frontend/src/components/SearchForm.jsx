@@ -1,38 +1,38 @@
-import { useState } from 'react';
-import './SearchForm.css';
+import { useState } from "react";
+import "./SearchForm.css";
 function SearchForm({ isIndexed, onSearchResults }) {
-  const [query, setQuery] = useState('');
-  const [similarityMethod, setSimilarityMethod] = useState('cosine');
+  const [query, setQuery] = useState("");
+  const [similarityMethod, setSimilarityMethod] = useState("cosine");
   const [isSearching, setIsSearching] = useState(false);
-  const [message, setMessage] = useState('');
-  
+  const [message, setMessage] = useState("");
+
   const handleSearch = async (e) => {
     e.preventDefault();
-    
+
     if (!query.trim()) {
-      setMessage('Veuillez saisir une requête');
+      setMessage("Veuillez saisir une requête");
       return;
     }
-    
+
     setIsSearching(true);
-    setMessage('Recherche en cours...');
-    
+    setMessage("Recherche en cours...");
+
     try {
-      const response = await fetch('http://localhost:5000/api/search', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5000/api/search", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           query: query,
-          similarity_method: similarityMethod
+          similarity_method: similarityMethod,
         }),
       });
-      
+
       const data = await response.json();
-      
+
       if (response.ok) {
-        setMessage(`${data.results.length} résultats trouvés`);
+        setMessage(`${data.results.length} resultats trouves`);
         onSearchResults(data.results);
       } else {
         setMessage(`Erreur: ${data.error}`);
@@ -43,11 +43,11 @@ function SearchForm({ isIndexed, onSearchResults }) {
       setIsSearching(false);
     }
   };
-  
+
   return (
     <div className="search-form">
       <h2>Recherche</h2>
-      
+
       <form onSubmit={handleSearch}>
         <div className="form-group">
           <input
@@ -59,29 +59,29 @@ function SearchForm({ isIndexed, onSearchResults }) {
             className="search-input"
           />
         </div>
-        
+
         <div className="form-group">
-          <label>Méthode de similarité:</label>
+          <label>Methode de similarite:</label>
           <select
             value={similarityMethod}
             onChange={(e) => setSimilarityMethod(e.target.value)}
             disabled={!isIndexed || isSearching}
             className="similarity-select"
           >
-            <option value="cosine">Similarité Cosinus</option>
+            <option value="cosine">Similarite Cosinus</option>
             <option value="euclidean">Distance Euclidienne</option>
           </select>
         </div>
-        
-        <button 
-          type="submit" 
+
+        <button
+          type="submit"
           disabled={!isIndexed || isSearching}
           className="button"
         >
           Rechercher
         </button>
       </form>
-      
+
       {message && <p className="message">{message}</p>}
     </div>
   );
