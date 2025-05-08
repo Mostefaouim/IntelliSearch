@@ -135,7 +135,9 @@ app.post('/api/upload', fileUploader.array('files'), (req, res) => {
 
   res.json({ message: `${Object.keys(engine.allTexts).length} files uploaded`, documents: Object.keys(engine.allTexts) });
 });
-
+app.get('/', (req, res) => {
+  res.send('Hello from the server!');
+});
 app.post('/api/index', (req, res) => {
   engine.buildTFIDF();
   const index = Object.entries(engine.invertedIndex).reduce((acc, [word, docs]) => {
