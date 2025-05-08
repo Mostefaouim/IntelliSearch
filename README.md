@@ -1,227 +1,227 @@
-# Application de Recherche d'Information TF-IDF
+# IntelliSearch: A TF IDF Information Retrieval Engine
 
-Cette application permet de charger des documents textuels, de les indexer en utilisant la methode TF-IDF (Term Frequency-Inverse Document Frequency) et d'effectuer des recherches dans ces documents.
+This application allows you to load textual documents, index them using the TF-IDF (Term Frequency-Inverse Document Frequency) method, and perform searches within these documents.
 
-## Fonctionnalites
+## Features
 
-- Chargement de fichiers texte (.txt) via une interface graphique
-- Pretraitement des textes:
-  - Normalisation (minuscules, suppression des caractères speciaux)
-  - Suppression des mots vides (stopwords)
-  - Stemming (reduction des mots à leur racine)
-- Calcul de l'index TF-IDF
-- Visualisation de l'index
-- Recherche par requête textuelle
-- Choix entre deux methodes de similarite:
-  - Similarite cosinus
-  - Distance euclidienne
-- Affichage des resultats tries par pertinence
+- Load text files (.txt) via a graphical interface
+- Text preprocessing:
+   - Normalization (lowercase, removal of special characters)
+   - Stopword removal
+   - Stemming (reducing words to their root form)
+- TF-IDF index calculation
+- Index visualization
+- Text query search
+- Choice between two similarity methods:
+   - Cosine similarity
+   - Euclidean distance
+- Display of results sorted by relevance
 
-## Structure du Projet
+## Project Structure
 
 ```
 TP_RI/
 ├── backend/
-│   ├── app.js               # API express js et logique metier
+│   ├── app.js               # Express.js API and business logic
 ├── frontend/
 │   ├── public/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── FileUpload.js    # Composant de chargement de fichiers
-│   │   │   ├── IndexViewer.js   # Composant de visualisation de l'index
-│   │   │   ├── SearchForm.js    # Formulaire de recherche
-│   │   │   └── SearchResults.js # Affichage des resultats
-│   │   ├── App.js           # Composant principal
-│   │   ├── App.css          # Styles CSS
-│   │   └── index.js         # Point d'entree React
-│   ├── package.json         # Dependances
-└── README.md                # Ce fichier
+│   │   │   ├── FileUpload.js    # File upload component
+│   │   │   ├── IndexViewer.js   # Index visualization component
+│   │   │   ├── SearchForm.js    # Search form
+│   │   │   └── SearchResults.js # Search results display
+│   │   ├── App.js           # Main component
+│   │   ├── App.css          # CSS styles
+│   │   └── index.js         # React entry point
+│   ├── package.json         # Dependencies
+└── README.md                # This file
 ```
 
-## Installation et Execution
+## Installation and Execution
 
-### Prerequis
+### Prerequisites
 
 - Node.js 14+
-- npm ou yarn
+- npm or yarn
 
-### Installation du Backend
+### Backend Installation
 
-1. Naviguer vers le dossier backend:
+1. Navigate to the backend folder:
 
-   ```
-   cd backend
-   ```
+    ```
+    cd backend
+    ```
 
-2. Installer les dependances:
+2. Install dependencies:
 
-   ```
-   npm init -y
+    ```
+    npm init -y
 
-   npm install express cors multer natural stopword nodemon
+    npm install express cors multer natural stopword nodemon
+    ```
 
-   ```
+3. Create an uploads folder at the project root:
+    ```
+    mkdir uploads
+    ```
 
-3. Creez un dossier uploads à la racine du projet :
-   ```
-   mkdir uploads
-   ```
-4. Lancer le serveur:
-   ```
-   nodemon app.js
-   ```
-   Le serveur demarrera sur http://localhost:5000
+4. Start the server:
+    ```
+    nodemon app.js
+    ```
+    The server will start at http://localhost:5000
 
-### Installation du Frontend
+### Frontend Installation
 
-1. Naviguer vers le dossier frontend:
+1. Navigate to the frontend folder:
 
-   ```
-   cd frontend
-   ```
+    ```
+    cd frontend
+    ```
 
-2. Installer les dependances:
+2. Install dependencies:
 
-   ```
-   npm install
-   ```
+    ```
+    npm install
+    ```
 
-   ou
+    or
 
-   ```
-   yarn install
-   ```
+    ```
+    yarn install
+    ```
 
-3. Lancer l'application:
-   ```
-   npm start
-   ```
-   ou
-   ```
-   yarn start
-   ```
-   L'application sera accessible sur http://localhost:3000
+3. Start the application:
+    ```
+    npm start
+    ```
+    or
+    ```
+    yarn start
+    ```
+    The application will be accessible at http://localhost:3000
 
-## Guide d'Utilisation
+## User Guide
 
-1. **Chargement des Documents**
+1. **Document Upload**
 
-   - Cliquez sur "Selectionner des fichiers" pour charger un ou plusieurs fichiers texte (.txt)
-   - Une fois les fichiers charges, vous verrez la liste des fichiers importes
-   - Cliquez sur "Indexer" pour lancer le processus d'indexation TF-IDF
+    - Click "Select Files" to upload one or more text files (.txt)
+    - Once the files are uploaded, you will see the list of imported files
+    - Click "Index" to start the TF-IDF indexing process
 
-2. **Visualisation de l'Index**
+2. **Index Visualization**
 
-   - Après l'indexation, l'application vous redirigera vers l'onglet "Visualisation de l'Index"
-   - Vous pouvez rechercher des termes specifiques dans la barre de recherche
-   - Vous pouvez trier les termes par ordre alphabetique ou par frequence
-   - Le tableau affiche chaque terme avec ses scores TF-IDF pour chaque document
+    - After indexing, the application will redirect you to the "Index Visualization" tab
+    - You can search for specific terms in the search bar
+    - You can sort terms alphabetically or by frequency
+    - The table displays each term with its TF-IDF scores for each document
 
-3. **Recherche**
-   - Accedez à l'onglet "Recherche"
-   - Saisissez votre requête dans le champ prevu
-   - Choisissez la methode de similarite (Cosinus ou Euclidienne)
-   - Cliquez sur "Rechercher" pour lancer la recherche
-   - Les resultats s'afficheront en dessous, tries par ordre decroissant de pertinence
+3. **Search**
+    - Go to the "Search" tab
+    - Enter your query in the provided field
+    - Choose the similarity method (Cosine or Euclidean)
+    - Click "Search" to perform the search
+    - The results will be displayed below, sorted in descending order of relevance
 
-## Explications Techniques
+## Technical Explanations
 
 ### TF-IDF
 
-Le TF-IDF (Term Frequency-Inverse Document Frequency) est une methode statistique utilisee en recherche d'information pour evaluer l'importance d'un terme dans un document par rapport à une collection de documents.
+TF-IDF (Term Frequency-Inverse Document Frequency) is a statistical method used in information retrieval to evaluate the importance of a term in a document relative to a collection of documents.
 
-- **TF (Term Frequency)** : Mesure la frequence d'un terme dans un document.
+- **TF (Term Frequency)**: Measures the frequency of a term in a document.
 
-  ```
-  TF(t, d) = (Nombre d'occurrences de t dans d) / (Nombre total de termes dans d)
-  ```
+   ```
+   TF(t, d) = (Number of occurrences of t in d) / (Total number of terms in d)
+   ```
 
-- **IDF (Inverse Document Frequency)** : Mesure l'importance du terme dans l'ensemble de la collection.
+- **IDF (Inverse Document Frequency)**: Measures the importance of the term in the entire collection.
 
-  ```
-  IDF(t) = log(Nombre total de documents / Nombre de documents contenant t)
-  ```
+   ```
+   IDF(t) = log(Total number of documents / Number of documents containing t)
+   ```
 
-- **TF-IDF** : Combinaison des deux mesures.
-  ```
-  TF-IDF(t, d) = TF(t, d) × IDF(t)
-  ```
+- **TF-IDF**: Combination of the two measures.
+   ```
+   TF-IDF(t, d) = TF(t, d) × IDF(t)
+   ```
 
-### Methodes de Similarite
+### Similarity Methods
 
-- **Similarite Cosinus** : Mesure l'angle entre deux vecteurs dans un espace multidimensionnel. Plus l'angle est petit, plus les documents sont similaires.
+- **Cosine Similarity**: Measures the angle between two vectors in a multidimensional space. The smaller the angle, the more similar the documents.
 
-  ```
-  cos(θ) = (q · d) / (||q|| × ||d||)
-  ```
+   ```
+   cos(θ) = (q · d) / (||q|| × ||d||)
+   ```
 
-  où q est le vecteur de la requête et d est le vecteur du document.
+   where q is the query vector and d is the document vector.
 
-- **Distance Euclidienne** : Mesure la distance "en ligne droite" entre deux vecteurs. Plus la distance est petite, plus les documents sont similaires.
-  ```
-  d(q, d) = √(Σ(qi - di)²)
-  ```
-  où q est le vecteur de la requête et d est le vecteur du document.
+- **Euclidean Distance**: Measures the "straight-line" distance between two vectors. The smaller the distance, the more similar the documents.
+   ```
+   d(q, d) = √(Σ(qi - di)²)
+   ```
+   where q is the query vector and d is the document vector.
 
-### Pretraitement du Texte
+### Text Preprocessing
 
-1. **Normalisation** :
+1. **Normalization**:
 
-   - Conversion en minuscules pour eliminer les differences de casse
-   - Suppression des caractères non alphanumeriques (ponctuation, symboles...)
+    - Convert to lowercase to eliminate case differences
+    - Remove non-alphanumeric characters (punctuation, symbols...)
 
-2. **Suppression des Stopwords** :
+2. **Stopword Removal**:
 
-   - elimination des mots vides ou mots outils (articles, prepositions, etc.)
-   - Ces mots très frequents apportent peu de valeur semantique
+    - Eliminate stopwords or filler words (articles, prepositions, etc.)
+    - These frequently occurring words provide little semantic value
 
-3. **Stemming** :
-   - Reduction des mots à leur racine (ex: "marchons", "marcher", "marchait" → "march")
-   - Permet de regrouper les variantes morphologiques d'un même mot
+3. **Stemming**:
+    - Reduce words to their root form (e.g., "walking", "walked", "walks" → "walk")
+    - Groups morphological variants of the same word
 
-## Architecture Technique
+## Technical Architecture
 
-### Backend (NodeJS /ExpressJS)
+### Backend (NodeJS / ExpressJS)
 
-- Utilisation de **ExpressJS** comme framework web leger
-- Bibliothèque **natural** pour le traitement du langage naturel (stopwords, stemming)
-- API RESTful avec 3 points d'entree principaux:
-  - `/api/upload` : Reception des fichiers texte
-  - `/api/index` : Indexation TF-IDF des documents
-  - `/api/search` : Recherche dans les documents indexes
+- Uses **ExpressJS** as a lightweight web framework
+- **natural** library for natural language processing (stopwords, stemming)
+- RESTful API with 3 main endpoints:
+   - `/api/upload`: Handles text file uploads
+   - `/api/index`: Performs TF-IDF indexing of documents
+   - `/api/search`: Searches within indexed documents
 
 ### Frontend (React)
 
-- Interface utilisateur construite avec **React**
-- Architecture à base de composants pour une meilleure maintenabilite
-- 4 composants principaux:
-  - `FileUpload` : Gestion du telechargement des fichiers
-  - `IndexViewer` : Affichage de l'index TF-IDF
-  - `SearchForm` : Formulaire de recherche
-  - `SearchResults` : Affichage des resultats de recherche
+- User interface built with **React**
+- Component-based architecture for better maintainability
+- 4 main components:
+   - `FileUpload`: Handles file uploads
+   - `IndexViewer`: Displays the TF-IDF index
+   - `SearchForm`: Allows query input and similarity method selection
+   - `SearchResults`: Displays search results
 
-## Fonctionnement Detaille du Code
+## Detailed Code Functionality
 
 ### Backend (app.js)
 
-Le backend est construit autour de la classe `TFIDFSearchEngine` qui implemente toutes les fonctionnalites d'indexation et de recherche:
+The backend is built around the `TFIDFSearchEngine` class, which implements all indexing and search functionalities:
 
-1. **Pretraitement** : Le texte passe par plusieurs etapes (normalisation, tokenization, suppression des stopwords, stemming).
-2. **Indexation** : Calcul des scores TF pour chaque document, puis des scores IDF et finalement des scores TF-IDF.
-3. **Recherche** : La requête subit le même pretraitement, puis les scores de similarite sont calcules entre le vecteur de la requête et chaque document.
+1. **Preprocessing**: The text undergoes several steps (normalization, tokenization, stopword removal, stemming).
+2. **Indexing**: Calculates TF scores for each document, then IDF scores, and finally TF-IDF scores.
+3. **Search**: The query undergoes the same preprocessing, and similarity scores are calculated between the query vector and each document.
 
-Les API REST exposent ces fonctionnalites au frontend:
+The REST APIs expose these functionalities to the frontend:
 
-- `/api/upload` : Pour uploader les fichiers texte
-- `/api/index` : Pour lancer l'indexation
-- `/api/search` : Pour effectuer une recherche
+- `/api/upload`: For uploading text files
+- `/api/index`: For starting the indexing process
+- `/api/search`: For performing searches
 
 ### Frontend (React)
 
-L'interface utilisateur est divisee en composants React:
+The user interface is divided into React components:
 
-1. `App.js` : Gère l'etat global et la navigation entre les onglets.
-2. `FileUpload.js` : S'occupe du telechargement des fichiers et du declenchement de l'indexation.
-3. `IndexViewer.js` : Affiche l'index TF-IDF sous forme de tableau avec des fonctionnalites de tri et de filtrage.
-4. `SearchForm.js` : Permet de saisir une requête et de choisir la methode de similarite.
-5. `SearchResults.js` : Affiche les resultats de recherche tries par pertinence.
+1. `App.js`: Manages global state and navigation between tabs.
+2. `FileUpload.js`: Handles file uploads and triggers indexing.
+3. `IndexViewer.js`: Displays the TF-IDF index in a table with sorting and filtering features.
+4. `SearchForm.js`: Allows users to input a query and select the similarity method.
+5. `SearchResults.js`: Displays search results sorted by relevance.
