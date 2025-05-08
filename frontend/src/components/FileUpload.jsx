@@ -4,7 +4,7 @@ function FileUpload({ onFilesLoaded, onIndexed, loadedFiles }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isIndexing, setIsIndexing] = useState(false);
   const [message, setMessage] = useState("");
-  const backendUrl = "https://backend-c5q8.onrender.com" || "http://localhost:5000";
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
   const handleFileChange = async (e) => {
     const files = e.target.files;

@@ -7,7 +7,7 @@ function SearchForm({ isIndexed, onSearchResults }) {
   const [isSearching, setIsSearching] = useState(false);
   const [message, setMessage] = useState("");
 
-  const backendUrl = "https://backend-c5q8.onrender.com" || "http://localhost:5000";
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
   const handleSearch = async (e) => {
     e.preventDefault();
 
