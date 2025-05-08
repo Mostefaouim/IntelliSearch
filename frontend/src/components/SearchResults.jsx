@@ -2,14 +2,14 @@ function SearchResults({ results }) {
   if (!results || results.length === 0) {
     return (
       <div className="search-results">
-        <p>Aucun resultat à afficher</p>
+        <p>No results to display</p>
       </div>
     );
   }
 
   return (
     <div className="search-results">
-      <h2>Resultats de Recherche</h2>
+      <h2>Search Results</h2>
 
       <div className="results-list">
         {results.map((result, index) => (

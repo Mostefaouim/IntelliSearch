@@ -33,7 +33,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Moteur de Recherche TF-IDF</h1>
+        <h1>TF-IDF Search Engine</h1>
       </header>
       
       <nav className="App-nav">
@@ -41,21 +41,21 @@ function App() {
           className={activeTab === 'upload' ? 'active' : ''} 
           onClick={() => setActiveTab('upload')}
         >
-          Chargement des Documents
+          Document Upload
         </button>
         <button 
           className={activeTab === 'index' ? 'active' : ''} 
           onClick={() => setActiveTab('index')}
           disabled={!isIndexed}
         >
-          Visualisation de l'Index
+          Index Viewer
         </button>
         <button 
           className={activeTab === 'search' ? 'active' : ''} 
           onClick={() => setActiveTab('search')}
           disabled={!isIndexed}
         >
-          Recherche
+          Search
         </button>
       </nav>
       

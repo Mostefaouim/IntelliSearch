@@ -20,8 +20,8 @@ class SearchEngine {
     this.wordDocumentCounts = {};
     this.textVectors = {};
     this.stopWordsList = [
-      ...['le', 'la', 'les', 'un', 'une', 'des', 'et', 'ou', 'de', 'du', 'en', 'est', 'pour', 'pas', 'que', 'qui', 'par', 'sur', 'dans', 'avec', 'ce', 'cette', 'ces', 'au', 'aux', 'plus', 'moins', 'votre', 'notre', 'leur', 'tous', 'tout', 'toute', 'toutes', 'autre', 'autres', 'même', 'aussi', 'fait'],
-      ...['a', 'its', 'an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'for', 'if', 'in', 'into', 'is', 'it', 'no', 'not', 'of', 'on', 'or', 'such', 'that', 'the', 'their', 'then', 'there', 'these', 'they', 'this', 'to', 'was', 'will', 'with']
+      ...['','le', 'la', 'les', 'un', 'une', 'des', 'et', 'ou', 'de', 'du', 'en', 'est', 'pour', 'pas', 'que', 'qui', 'par', 'sur', 'dans', 'avec', 'ce', 'cette', 'ces', 'au', 'aux', 'plus', 'moins', 'votre', 'notre', 'leur', 'tous', 'tout', 'toute', 'toutes', 'autre', 'autres', 'même', 'aussi', 'fait'],
+      ...[ ' ', 'a', 'its', 'an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'for', 'if', 'in', 'into', 'is', 'it', 'no', 'not', 'of', 'on', 'or', 'such', 'that', 'the', 'their', 'then', 'there', 'these', 'they', 'this', 'to', 'was', 'will', 'with']
     ];
   }
 
@@ -88,13 +88,11 @@ class SearchEngine {
       Object.values(docVec).forEach(value => docSize += value ** 2);
       return dot / (Math.sqrt(querySize) * Math.sqrt(docSize));
     } else {
-      const allWords = new Set([...Object.keys(queryVec), ...Object.keys(docVec)]);
-      let total = 0;
-      allWords.forEach(word => {
-        const diff = (queryVec[word] || 0) - (docVec[word] || 0);
-        total += diff ** 2;
+      let dotProduct = 0;
+      Object.keys(queryVec).forEach(word => {
+        dotProduct += queryVec[word] * (docVec[word] || 0);
       });
-      return 1 / Math.sqrt(total);
+      return dotProduct;
     }
   }
 
@@ -124,7 +122,7 @@ const engine = new SearchEngine();
 
 app.post('/api/upload', fileUploader.array('files'), (req, res) => {
   if (!req.files || req.files.length === 0)
-    return res.status(400).json({ error: 'Aucun fichier trouvé' });
+    return res.status(400).json({ error: 'No files found' });
 
   engine.allTexts = {};
   req.files.forEach(uploaded => {
@@ -135,7 +133,7 @@ app.post('/api/upload', fileUploader.array('files'), (req, res) => {
     }
   });
 
-  res.json({ message: `${Object.keys(engine.allTexts).length} fichiers chargés`, documents: Object.keys(engine.allTexts) });
+  res.json({ message: `${Object.keys(engine.allTexts).length} files uploaded`, documents: Object.keys(engine.allTexts) });
 });
 
 app.post('/api/index', (req, res) => {
@@ -144,12 +142,12 @@ app.post('/api/index', (req, res) => {
     acc[word] = Object.entries(docs).map(([fileName, tfidf]) => ({ document: fileName, tfidf }));
     return acc;
   }, {});
-  res.json({ message: 'Indexation terminée', index, terms_count: Object.keys(index).length });
+  res.json({ message: 'Indexing completed', index, terms_count: Object.keys(index).length });
 });
 
 app.post('/api/search', (req, res) => {
   const { query, similarity_method = 'cosine' } = req.body;
-  if (!query) return res.status(400).json({ error: 'Requête vide' });
+  if (!query) return res.status(400).json({ error: 'Empty query' });
 
   const matches = engine.searchText(query, similarity_method).map(([fileName, score]) => ({
     document: fileName,
@@ -160,6 +158,6 @@ app.post('/api/search', (req, res) => {
 });
 
 const PORT = 5000;
-app.listen(PORT, () => console.log(`Serveur démarré sur le port ${PORT}`));
+app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 
 export default app;

@@ -10,12 +10,12 @@ function SearchForm({ isIndexed, onSearchResults }) {
     e.preventDefault();
 
     if (!query.trim()) {
-      setMessage("Veuillez saisir une requête");
+      setMessage("Please enter a query");
       return;
     }
 
     setIsSearching(true);
-    setMessage("Recherche en cours...");
+    setMessage("Searching...");
 
     try {
       const response = await fetch("http://localhost:5000/api/search", {
@@ -32,13 +32,13 @@ function SearchForm({ isIndexed, onSearchResults }) {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(`${data.results.length} resultats trouves`);
+        setMessage(`${data.results.length} results found`);
         onSearchResults(data.results);
       } else {
-        setMessage(`Erreur: ${data.error}`);
+        setMessage(`Error: ${data.error}`);
       }
     } catch (error) {
-      setMessage(`Erreur de connexion au serveur: ${error.message}`);
+      setMessage(`Server connection error: ${error.message}`);
     } finally {
       setIsSearching(false);
     }
@@ -46,13 +46,13 @@ function SearchForm({ isIndexed, onSearchResults }) {
 
   return (
     <div className="search-form">
-      <h2>Recherche</h2>
+      <h2>Search</h2>
 
       <form onSubmit={handleSearch}>
         <div className="form-group">
           <input
             type="text"
-            placeholder="Entrez votre requête..."
+            placeholder="Enter your query..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             disabled={!isIndexed || isSearching}
@@ -61,15 +61,15 @@ function SearchForm({ isIndexed, onSearchResults }) {
         </div>
 
         <div className="form-group">
-          <label>Methode de similarite:</label>
+          <label>Similarity Method:</label>
           <select
             value={similarityMethod}
             onChange={(e) => setSimilarityMethod(e.target.value)}
             disabled={!isIndexed || isSearching}
             className="similarity-select"
           >
-            <option value="cosine">Similarite Cosinus</option>
-            <option value="euclidean">Distance Euclidienne</option>
+            <option value="cosine">Cosine Similarity</option>
+            <option value="euclidean">Euclidean Distance</option>
           </select>
         </div>
 
@@ -78,7 +78,7 @@ function SearchForm({ isIndexed, onSearchResults }) {
           disabled={!isIndexed || isSearching}
           className="button"
         >
-          Rechercher
+          Search
         </button>
       </form>
 

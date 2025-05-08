@@ -24,12 +24,12 @@ function IndexViewer({ indexData }) {
   ).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));  
   return (
     <div className="index-viewer">
-      <h2>Visualisation de l'Index</h2>
+      <h2>Index Viewer</h2>
   
       <div className="controls">
         <input
           type="text"
-          placeholder="Rechercher un terme..."
+          placeholder="Search for a term..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-input"
@@ -44,7 +44,7 @@ function IndexViewer({ indexData }) {
               checked={sortOrder === "alpha"}
               onChange={() => setSortOrder("alpha")}
             />
-            Alphabetique
+            Alphabetical
           </label>
           <label>
             <input
@@ -54,7 +54,7 @@ function IndexViewer({ indexData }) {
               checked={sortOrder === "count"}
               onChange={() => setSortOrder("count")}
             />
-            Frequence
+            Frequency
           </label>
         </div>
       </div>
@@ -91,8 +91,8 @@ function IndexViewer({ indexData }) {
       </div>
   
       <div className="stats">
-        <p>Total de termes indexés : {terms.length}</p>
-        <p>Termes affichés : {sortedTerms.length}</p>
+        <p>Total indexed terms: {terms.length}</p>
+        <p>Displayed terms: {sortedTerms.length}</p>
       </div>
     </div>
   );

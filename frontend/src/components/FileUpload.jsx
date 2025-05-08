@@ -10,7 +10,7 @@ function FileUpload({ onFilesLoaded, onIndexed, loadedFiles }) {
     if (!files || files.length === 0) return;
 
     setIsLoading(true);
-    setMessage("Chargement des fichiers...");
+    setMessage("Uploading files...");
 
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
@@ -26,13 +26,13 @@ function FileUpload({ onFilesLoaded, onIndexed, loadedFiles }) {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(`${data.documents.length} fichiers charges avec succès.`);
+        setMessage(`${data.documents.length} files uploaded successfully.`);
         onFilesLoaded(data.documents);
       } else {
-        setMessage(`Erreur: ${data.error}`);
+        setMessage(`Error: ${data.error}`);
       }
     } catch (error) {
-      setMessage(`Erreur de connexion au serveur: ${error.message}`);
+      setMessage(`Server connection error: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -40,7 +40,7 @@ function FileUpload({ onFilesLoaded, onIndexed, loadedFiles }) {
 
   const handleIndexing = async () => {
     setIsIndexing(true);
-    setMessage("Indexation des documents...");
+    setMessage("Indexing documents...");
 
     try {
       const response = await fetch("http://localhost:5000/api/index", {
@@ -53,13 +53,13 @@ function FileUpload({ onFilesLoaded, onIndexed, loadedFiles }) {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(`Indexation terminee: ${data.terms_count} termes indexes.`);
+        setMessage(`Indexing completed: ${data.terms_count} terms indexed.`);
         onIndexed(data.index);
       } else {
-        setMessage(`Erreur: ${data.error}`);
+        setMessage(`Error: ${data.error}`);
       }
     } catch (error) {
-      setMessage(`Erreur de connexion au serveur: ${error.message}`);
+      setMessage(`Server connection error: ${error.message}`);
     } finally {
       setIsIndexing(false);
     }
@@ -67,7 +67,7 @@ function FileUpload({ onFilesLoaded, onIndexed, loadedFiles }) {
 
   return (
     <div className="file-upload">
-      <h2>Chargement des Documents</h2>
+      <h2>Document Upload</h2>
 
       <div className="upload-controls">
         <input
@@ -80,7 +80,7 @@ function FileUpload({ onFilesLoaded, onIndexed, loadedFiles }) {
           style={{ display: "none" }}
         />
         <label htmlFor="fileInput" className="button">
-          Selectionner des fichiers
+          Select Files
         </label>
 
         <button
@@ -88,7 +88,7 @@ function FileUpload({ onFilesLoaded, onIndexed, loadedFiles }) {
           disabled={isIndexing || loadedFiles.length === 0}
           className="button"
         >
-          Indexer
+          Index
         </button>
       </div>
 
@@ -96,7 +96,7 @@ function FileUpload({ onFilesLoaded, onIndexed, loadedFiles }) {
 
       {loadedFiles.length > 0 && (
         <div className="files-list">
-          <h3>Fichiers charges:</h3>
+          <h3>Uploaded Files:</h3>
           <ul>
             {loadedFiles.map((file, index) => (
               <li key={index}>{file}</li>
