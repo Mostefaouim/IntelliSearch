@@ -1,11 +1,13 @@
 import { useState } from "react";
 import "./SearchForm.css";
+
 function SearchForm({ isIndexed, onSearchResults }) {
   const [query, setQuery] = useState("");
   const [similarityMethod, setSimilarityMethod] = useState("cosine");
   const [isSearching, setIsSearching] = useState(false);
   const [message, setMessage] = useState("");
 
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
   const handleSearch = async (e) => {
     e.preventDefault();
 
@@ -18,7 +20,7 @@ function SearchForm({ isIndexed, onSearchResults }) {
     setMessage("Searching...");
 
     try {
-      const response = await fetch("http://localhost:5000/api/search", {
+      const response = await fetch(`${backendUrl}/api/search`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

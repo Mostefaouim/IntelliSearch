@@ -4,6 +4,7 @@ function FileUpload({ onFilesLoaded, onIndexed, loadedFiles }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isIndexing, setIsIndexing] = useState(false);
   const [message, setMessage] = useState("");
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
   const handleFileChange = async (e) => {
     const files = e.target.files;
@@ -18,7 +19,7 @@ function FileUpload({ onFilesLoaded, onIndexed, loadedFiles }) {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/upload", {
+      const response = await fetch(`${backendUrl}/api/upload`, {
         method: "POST",
         body: formData,
       });
@@ -43,7 +44,7 @@ function FileUpload({ onFilesLoaded, onIndexed, loadedFiles }) {
     setMessage("Indexing documents...");
 
     try {
-      const response = await fetch("http://localhost:5000/api/index", {
+      const response = await fetch(`${backendUrl}/api/index`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
