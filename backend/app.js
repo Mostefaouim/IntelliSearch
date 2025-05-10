@@ -10,7 +10,7 @@ const app = express();
 const fileUploader = multer({ dest: 'uploads/' });
 const wordStemmer = natural.PorterStemmer;
 
-app.use(cors({origin: 'https://intellisearch-udp3.onrender.com'}));
+app.use(cors({origin: '*'}));
 app.use(express.json());
 
 class SearchEngine {
